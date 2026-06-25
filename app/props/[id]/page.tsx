@@ -1,72 +1,35 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import { Header } from '@/components/Header'
-import { TrendChart } from '@/components/TrendChart'
-import { ArsenalTable } from '@/components/ArsenalTable'
-import { LineupTable } from '@/components/LineupTable'
-import { getProp, props } from '@/lib/data'
+import { ArrowLeft, BadgeDollarSign, Brain, Gauge, ShieldCheck } from 'lucide-react'
+import { props } from '@/lib/data'
 
 export function generateStaticParams() { return props.map((prop) => ({ id: prop.id })) }
 
-export default function PropDetailPage({ params }: { params: { id: string } }) {
-  const prop = getProp(params.id)
-  if (!prop) notFound()
-  const hitCount = prop.recent.filter((game) => prop.side === 'Over' ? game.value > prop.line : game.value < prop.line).length
-  const hitRate = Math.round((hitCount / prop.recent.length) * 100)
+export default function PropPage({ params }: { params: { id: string } }) {
+  const prop = props.find((p) => p.id === params.id) ?? props[0]
   return (
-    <main className="min-h-screen grid-bg">
-      <Header />
-      <section className="mx-auto max-w-7xl px-5 py-8">
-        <Link href="/" className="pill inline-flex px-4 py-2 text-sm text-white/70">← Back to props</Link>
-        <div className="mt-5 overflow-hidden rounded-[2rem] border border-white/10 bg-[radial-gradient(circle_at_18%_20%,rgba(16,185,129,.22),transparent_30%),radial-gradient(circle_at_85%_10%,rgba(139,92,246,.28),transparent_34%),linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03))] p-6 md:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-4">
-              <div className="grid h-20 w-20 shrink-0 place-items-center rounded-3xl border border-white/10 bg-black/35 text-2xl font-black text-emerald-200">{prop.headshot}</div>
-              <div>
-                <h1 className="text-4xl font-black tracking-tight">{prop.player} <span className="text-white/40">({prop.hand})</span></h1>
-                <div className="mt-1 text-white/60">{prop.team} vs {prop.opponent} · {prop.gameTime}</div>
-                <div className="mt-3 text-2xl font-black">{prop.market} — {prop.side} {prop.line}</div>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-3 text-center sm:min-w-[390px]">
-              <HeroMetric label="Diamond" value={prop.diamondScore} suffix="/100" />
-              <HeroMetric label="Confidence" value={prop.confidence} suffix="%" />
-              <HeroMetric label="Edge" value={`+${prop.edge}`} suffix="%" />
+    <main className="min-h-screen bg-[#050505] px-5 py-8 text-white">
+      <div className="mx-auto max-w-6xl">
+        <Link href="/" className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[.04] px-4 py-2 text-sm font-bold text-white/70 hover:text-white"><ArrowLeft className="h-4 w-4"/> Back to dashboard</Link>
+        <section className="mt-6 overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b0b0d] shadow-[0_40px_120px_rgba(0,0,0,.45)]">
+          <div className="bg-[radial-gradient(circle_at_15%_20%,rgba(16,185,129,.28),transparent_35%),radial-gradient(circle_at_85%_10%,rgba(139,92,246,.24),transparent_35%)] p-8">
+            <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <div><div className="text-xs font-black uppercase tracking-[.25em] text-emerald-200">{prop.sport} Research Terminal</div><h1 className="mt-3 text-5xl font-black tracking-[-.05em]">{prop.player}</h1><p className="mt-2 text-white/55">{prop.team} @ {prop.opponent} · {prop.time}</p><div className="mt-5 text-2xl font-black">{prop.market} · {prop.line}</div></div>
+              <div className="grid grid-cols-3 gap-2 text-center sm:min-w-[380px]"><Metric label="Score" value={prop.diamondScore}/><Metric label="Conf" value={`${prop.confidence}%`}/><Metric label="Edge" value={prop.edge}/></div>
             </div>
           </div>
-        </div>
-
-        <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_360px]">
-          <div className="space-y-5">
-            <div className="glass rounded-3xl p-5">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div><h2 className="text-2xl font-black">Recent Form</h2><p className="text-sm text-white/45">Last 10 results against the {prop.line} line</p></div>
-                <div className="text-right"><div className="text-4xl font-black text-rose-300">{hitRate}%</div><div className="text-sm text-white/45">{hitCount} of {prop.recent.length}</div></div>
-              </div>
-              <div className="mt-5"><TrendChart data={prop.recent} line={prop.line} /></div>
+          <div className="grid gap-5 p-6 lg:grid-cols-[1fr_.45fr]">
+            <div className="space-y-5">
+              <Card title="Diamond Intelligence" icon={<Brain className="h-4 w-4"/>}><p className="text-sm leading-7 text-white/60">{prop.player} grades as a {prop.grade} play with a {prop.diamondScore} Diamond Score. The model projection sits at {prop.projection} against the market line of {prop.line} creating a measured edge of {prop.edge}. This page is built to scale across every pitcher and market on the slate.</p></Card>
+              <Card title="Projection Snapshot" icon={<Gauge className="h-4 w-4"/>}><div className="grid gap-3 sm:grid-cols-4"><Metric label="Line" value={prop.line}/><Metric label="Projection" value={prop.projection}/><Metric label="Odds" value={prop.odds}/><Metric label="Grade" value={prop.grade}/></div></Card>
+              <Card title="Risk Factors" icon={<ShieldCheck className="h-4 w-4"/>}><div className="grid gap-3 sm:grid-cols-3">{['Lineup volatility','Pitch count leash','Market movement'].map((x)=><div key={x} className="rounded-2xl border border-white/10 bg-white/[.035] p-4 text-sm font-bold text-white/60">{x}</div>)}</div></Card>
             </div>
-            <ArsenalTable pitches={prop.arsenal} />
-            <LineupTable lineup={prop.lineup} />
+            <Card title="Best Books" icon={<BadgeDollarSign className="h-4 w-4"/>}>{prop.books.map((b)=><div key={b} className="mb-3 flex items-center justify-between rounded-2xl border border-white/10 bg-white/[.035] p-4"><span className="font-black">{b}</span><span className="font-black text-emerald-200">{prop.odds}</span></div>)}</Card>
           </div>
-          <aside className="space-y-5">
-            <div className="glass rounded-3xl p-5">
-              <h3 className="font-black">Diamond Intelligence</h3>
-              <div className="mt-3 rounded-2xl bg-emerald-300/10 p-4"><div className="text-xs uppercase tracking-widest text-emerald-200">Model Projection</div><div className="mt-1 text-4xl font-black">{prop.projection}</div></div>
-              <p className="mt-4 text-sm leading-6 text-white/65">{prop.summary}</p>
-            </div>
-            <div className="glass rounded-3xl p-5">
-              <h3 className="font-black">Risk Factors</h3>
-              <div className="mt-3 space-y-2">{prop.risks.map(r=><div key={r} className="rounded-2xl bg-white/[.045] p-3 text-sm text-white/65">• {r}</div>)}</div>
-            </div>
-            <div className="glass rounded-3xl p-5">
-              <h3 className="font-black">Best Books</h3>
-              <div className="mt-3 space-y-2">{prop.books.map(book=><div key={book.book} className="flex justify-between rounded-2xl bg-white/[.045] p-3"><span>{book.book}</span><span className="font-black">{book.odds > 0 ? `+${book.odds}` : book.odds}</span></div>)}</div>
-            </div>
-          </aside>
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
   )
 }
 
-function HeroMetric({ label, value, suffix }: { label: string; value: string | number; suffix: string }) { return <div className="rounded-3xl border border-white/10 bg-black/30 p-4"><div className="text-[10px] uppercase tracking-widest text-white/40">{label}</div><div className="mt-1 text-3xl font-black">{value}<span className="text-base text-white/45">{suffix}</span></div></div> }
+function Metric({ label, value }: { label: string; value: string | number }) { return <div className="rounded-2xl border border-white/10 bg-black/35 p-4"><div className="text-[10px] font-black uppercase tracking-[.2em] text-white/35">{label}</div><div className="mt-1 text-2xl font-black">{value}</div></div> }
+function Card({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) { return <div className="rounded-3xl border border-white/10 bg-white/[.035] p-5"><div className="mb-4 flex items-center gap-2 font-black">{icon}{title}</div>{children}</div> }

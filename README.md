@@ -1,2 +1,2 @@
-# DiamondEdge AI v6
-Safe build with clickable prop pages, slate dashboard, pitcher rows, detail terminal, and demo data.
+# DiamondEdge Module 1 Terminal Dashboard
+Upload the contents of this folder to the repository root.

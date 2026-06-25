@@ -1,8 +1,15 @@
-import './globals.css'
 import type { Metadata } from 'next'
+import './globals.css'
 
-export const metadata: Metadata = { title: 'DiamondEdge AI', description: 'Professional MLB prop intelligence' }
+export const metadata: Metadata = {
+  title: 'DiamondEdge',
+  description: 'Sports intelligence terminal',
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="en"><body>{children}</body></html>
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  )
 }
